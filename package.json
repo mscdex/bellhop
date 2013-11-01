@@ -1,5 +1,5 @@
 { "name": "bellhop",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Brian White <mscdex@mscdex.net>",
   "description": "Pubsub and RPC streams for node.js",
   "main": "./lib/main",
