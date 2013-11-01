@@ -1,4 +1,5 @@
-var serializeArgs = require('../lib/utils').serializeArgs;
+var utils = require('../lib/utils'),
+    serializeArgs = utils.serializeArgs;
 
 var path = require('path'),
     assert = require('assert');
@@ -9,7 +10,9 @@ var group = path.basename(__filename, '.js') + '/';
   { source: [1, 'string', true, null],
     test: function(source) {
       var typeinfo = serializeArgs(source);
-      assert.equal(typeinfo.length, 0, makeMsg(this, 'Unexpected typeinfo'));
+      assert.deepEqual(typeinfo,
+                       [],
+                       makeMsg(this, 'Unexpected typeinfo'));
       assert.deepEqual(source,
                        [1, 'string', true, null],
                        makeMsg(this, 'Unexpected serialization'));
@@ -20,7 +23,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.2],
+                       [utils.ID_DATE],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        ['2013-11-01T02:43:45.730Z'],
@@ -32,7 +35,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.4],
+                       [utils.ID_FUNCTION],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [[['a', 'b'], " console.log('Hello World!'); "]],
@@ -44,7 +47,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.4],
+                       [utils.ID_FUNCTION],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [" console.log('Hello World!'); "],
@@ -56,7 +59,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.5],
+                       [utils.ID_REGEXP],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [['^Hello World$', 'gi', 0]],
@@ -68,7 +71,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.5],
+                       [utils.ID_REGEXP],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [['^Hello World$', 0]],
@@ -82,7 +85,7 @@ var group = path.basename(__filename, '.js') + '/';
       source[0].exec('hello world hello world');
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.5],
+                       [utils.ID_REGEXP],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [['Hello World', 'gi', 23]],
@@ -96,7 +99,7 @@ var group = path.basename(__filename, '.js') + '/';
       // serializeArgs
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.3],
+                       [utils.ID_BUFFER],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [new Buffer([0,1,2,3,4])],
@@ -109,7 +112,7 @@ var group = path.basename(__filename, '.js') + '/';
       // stringify() changes +/-Infinity to null and we do no inline replace
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.7],
+                       [utils.ID_PINF],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [Infinity],
@@ -122,7 +125,7 @@ var group = path.basename(__filename, '.js') + '/';
       // stringify() changes +/-Infinity to null and we do no inline replace
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.8],
+                       [utils.ID_NINF],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
                        [-Infinity],
@@ -135,7 +138,7 @@ var group = path.basename(__filename, '.js') + '/';
       // stringify() changes NaN to null and we do no inline replace
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.6],
+                       [utils.ID_NAN],
                        makeMsg(this, 'Wrong typeinfo'));
       assert(source[0].toString() === 'NaN',
              makeMsg(this, 'Unexpected serialization'));
@@ -146,7 +149,7 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.9],
+                       [utils.ID_ERROR],
                        makeMsg(this, 'Wrong typeinfo'));
       assert(typeof source[0].stack === 'string' && source[0].stack.length,
              makeMsg(this, 'Missing stack'));
@@ -159,10 +162,10 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0],
+                       [utils.ID_OBJECT],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
-                       [[[1.2],['date', '2013-11-01T02:43:45.730Z']]],
+                       [[[1 + utils.ID_DATE],['date', '2013-11-01T02:43:45.730Z']]],
                        makeMsg(this, 'Bad serialization'));
     },
     what: 'Object with Date'
@@ -171,10 +174,10 @@ var group = path.basename(__filename, '.js') + '/';
     test: function(source) {
       var typeinfo = serializeArgs(source);
       assert.deepEqual(typeinfo,
-                       [0.1],
+                       [utils.ID_ARRAY],
                        makeMsg(this, 'Wrong typeinfo'));
       assert.deepEqual(source,
-                       [[[0.2],['2013-11-01T02:43:45.730Z']]],
+                       [[[utils.ID_DATE],['2013-11-01T02:43:45.730Z']]],
                        makeMsg(this, 'Bad serialization'));
     },
     what: 'Array with Date'
