@@ -5,7 +5,7 @@ Description
 A node.js module that exposes streams for doing Pubsub and RPC.
 
 Serialization of types unsupported by JSON is also an option and is enabled by default.
-It should also be noted that properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization.
+Currently properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization. Also, circular references are not detected currently.
 
 
 Requirements
