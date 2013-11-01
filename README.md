@@ -126,6 +126,11 @@ Pubsub properties
 
 * **events** - _EventEmitter_ - This is the event emitter object used to emit events to others and to receive events from others.
 
+Pubsub (special) events
+-----------------------
+
+* __*__(< _mixed_ >event[, < _mixed_ >arg1, ..., < _mixed_ >argn]) - Emitted for every event for use as a "catch-all."
+
 Pubsub methods
 --------------
 
