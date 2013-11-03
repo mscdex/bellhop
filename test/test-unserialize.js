@@ -1,5 +1,5 @@
 var utils = require('../lib/utils'),
-    serializeArgs = utils.serializeArgs
+    serializeArgs = utils.serializeArgs,
     unserializeArgs = utils.unserializeArgs;
 
 var path = require('path'),
