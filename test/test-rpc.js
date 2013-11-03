@@ -30,7 +30,7 @@ var tests = [
         cb(a * b);
       });
 
-      var fn = client.makeRemoteFn('multiply');
+      var fn = client.generate('multiply');
       fn(5, 6, function(result) {
         assert(result === 30,
                makeMsg(self, 'Wrong function result'));
@@ -47,7 +47,7 @@ var tests = [
         next();
       });
 
-      var fn = client.makeRemoteFn('multiply');
+      var fn = client.generate('multiply');
       fn(5, 6);
     },
     what: 'Basic function + no response'
@@ -60,7 +60,7 @@ var tests = [
         cb(a.map(mapper));
       });
 
-      var fn = client.makeRemoteFn('map');
+      var fn = client.generate('map');
       fn([1, 2, 3, 4, 5], function(n) {
         return n * 2;
       }, function(result) {
@@ -80,7 +80,7 @@ var tests = [
         next();
       });
 
-      var fn = client.makeRemoteFn('map');
+      var fn = client.generate('map');
       fn([1, 2, 3, 4, 5], function(n) {
         return n * 2;
       });

@@ -45,9 +45,9 @@ RPC_Server.add(function customCalc(fn) {
 });
 
 
-var add = RPC_Client.makeRemoteFn('add'),
-    serverDate = RPC_Client.makeRemoteFn('serverDate'),
-    customCalc = RPC_Client.makeRemoteFn('customCalc');
+var add = RPC_Client.generate('add'),
+    serverDate = RPC_Client.generate('serverDate'),
+    customCalc = RPC_Client.generate('customCalc');
 
 add(5, 5, function(result) {
   console.log('add() result = ' + result);
@@ -112,7 +112,7 @@ RPC methods
 
     * Additionally `options` is passed to the underlying Xfer instance, allowing for configuration of Xfer too if needed (not common).
 
-* **makeRemoteFn**(< _string_ >remoteFuncName) - _function_ - Returns a function that can be used when calling a particular remote function. This makes things easier than using send() manually. The return value of the returned function is similar to that of Writable.write() and indicates if the high water mark has been reached.
+* **generate**(< _string_ >remoteFuncName) - _function_ - Returns a function that can be used when calling a particular remote function. This makes things easier than using send() manually. The return value of the returned function is similar to that of Writable.write() and indicates if the high water mark has been reached.
 
 * **send**([< _mixed_ >arg1, ..., < _mixed_ >argn, ]< _string_ >remoteFuncName[, < _function_ >callback]) - _(boolean)_ - Calls the function identified by `remoteFuncName` (with optional arguments). The return value is similar to that of Writable.write() and indicates if the high water mark has been reached.
 
