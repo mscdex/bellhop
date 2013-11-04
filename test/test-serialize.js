@@ -182,6 +182,21 @@ var group = path.basename(__filename, '.js') + '/';
     },
     what: 'Array with Date'
   },
+  { source: [{ foo: 'bar', toJSON: function() { return 'Hello World!'; } }],
+    test: function(source) {
+      var origFn = source[0].toJSON,
+          typeinfo = serializeArgs(source);
+      assert.deepEqual(typeinfo,
+                       [],
+                       makeMsg(this, 'Unexpected typeinfo'));
+      assert.deepEqual(source,
+                       [{ foo: 'bar',
+                          toJSON: origFn
+                       }],
+                       makeMsg(this, 'Unexpected serialization'));
+    },
+    what: 'Object with existing toJSON method'
+  },
 ].forEach(function(v) {
   v.test.call(v.what, v.source);
 });
