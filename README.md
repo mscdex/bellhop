@@ -16,6 +16,32 @@ Notes:
 
      * Callback functions follow the error-first argument pattern. Any arguments after the error argument are values returned by the other side.
 
+     * All functions returned by `generate()` will assume that a function passed as the last argument will be a callback to be executed when the server responds. If you need to pass a function to the other side, make sure a non-function value separates it and the optional callback **OR** you can use `send()` directly instead. Examples:
+
+        ```javascript
+        // ....
+        var map = RPC_Client.generate('map');
+
+        // no callback/response (THIS IS WRONG, the mapper function will not be sent to the other side and will be used as a callback instead)
+        map([0, 1, 2, 3, 4], function(n) { return n * 2; });
+
+        // no callback/response
+        map(function(n) { return n * 2; }, [0, 1, 2, 3, 4]);
+
+        // callback/response requested
+        map(function(n) { return n * 2; }, [0, 1, 2, 3, 4], function(result) { console.log('Result: ' + result); });
+
+        // OR always use `send()` directly if you want/need the mapper function to always be the second argument:
+
+        // no callback/response
+        RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map');
+
+        // callback/response requested
+        RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map', function(result) {
+          console.log('Result: ' + result);
+        });
+        ```
+
 
 Requirements
 ============
