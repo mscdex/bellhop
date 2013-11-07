@@ -4,8 +4,17 @@ Description
 
 A node.js module that exposes streams for doing Pubsub and RPC.
 
-Serialization of types unsupported by JSON is also an option and is enabled by default.
-Currently properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization. Also, circular references are not detected currently.
+Notes:
+
+ * Serialization of types unsupported by JSON is an option and is enabled by default.
+ 
+ * Properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization.
+
+ * Circular references are not detected.
+
+ * RPC-specific:
+
+     * Callback functions follow the error-first argument pattern. Any arguments after the error argument are values returned by the other side.
 
 
 Requirements
@@ -49,15 +58,15 @@ var add = RPC_Client.generate('add'),
     serverDate = RPC_Client.generate('serverDate'),
     customCalc = RPC_Client.generate('customCalc');
 
-add(5, 5, function(result) {
+add(5, 5, function(err, result) {
   console.log('add() result = ' + result);
 });
-serverDate(function(date) {
+serverDate(function(err, date) {
   console.log('serverDate() date UNIX timestamp: ' + date.getTime());
 });
 customCalc(function() {
   console.log('Look at me, I am running on the server!');
-}, function() {
+}, function(err) {
   console.log('customCalc() Finished executing function on server');
 });
 
@@ -107,6 +116,8 @@ RPC methods
 * **(constructor)**([< _object_ >options]) - Creates and returns a new RPC instance with the following valid `options`:
 
     * **serialize** - _boolean_ - Manually serialize objects that JSON does not support (well)? (Default: true).
+
+    * **ignoreInvalidCall** - _boolean_ - Do not send error responses to incoming function call requests for invalid methods (Default: false).
 
     * **highWaterMark** - _integer_ - High water mark to use for this stream (Default: Duplex stream default).
 

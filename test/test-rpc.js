@@ -25,15 +25,14 @@ var tests = [
   { test: function(server, client, next) {
       var self = this;
       server.add(function multiply(a, b, cb) {
-        assert(typeof cb === 'function',
-               makeMsg(self, 'Missing callback'));
+        assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
         cb(a * b);
       });
 
       var fn = client.generate('multiply');
-      fn(5, 6, function(result) {
-        assert(result === 30,
-               makeMsg(self, 'Wrong function result'));
+      fn(5, 6, function(err, result) {
+        assert(!err, makeMsg(self, 'Unexpected error: ' + err));
+        assert(result === 30, makeMsg(self, 'Wrong function result'));
         next();
       });
     },
@@ -42,11 +41,14 @@ var tests = [
   { test: function(server, client, next) {
       var self = this;
       server.add(function multiply(a, b, cb) {
-        assert(cb === undefined,
-               makeMsg(self, 'Unexpected callback'));
-        next();
+        assert(a === 5 && b === 6, makeMsg(self, 'Wrong function arguments'));
+        assert(cb === undefined, makeMsg(self, 'Unexpected callback'));
+        process.nextTick(next);
       });
 
+      client.on('error', function(err) {
+        assert(!err, makeMsg(self, 'Unexpected error: ' + err));
+      });
       var fn = client.generate('multiply');
       fn(5, 6);
     },
@@ -55,15 +57,15 @@ var tests = [
   { test: function(server, client, next) {
       var self = this;
       server.add(function map(a, mapper, cb) {
-        assert(typeof cb === 'function',
-               makeMsg(self, 'Missing callback'));
+        assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
         cb(a.map(mapper));
       });
 
       var fn = client.generate('map');
       fn([1, 2, 3, 4, 5], function(n) {
         return n * 2;
-      }, function(result) {
+      }, function callback(err, result) {
+        assert(!err, makeMsg(self, 'Unexpected error: ' + err));
         assert.deepEqual(result,
                          [2, 4, 6, 8, 10],
                          makeMsg(self, 'Wrong function result'));
@@ -74,16 +76,16 @@ var tests = [
   },
   { test: function(server, client, next) {
       var self = this;
-      server.add(function map(a, mapper, cb) {
-        assert(cb === undefined,
-               makeMsg(self, 'Unexpected callback'));
+      server.add(function map(mapper, a, cb) {
+        assert(typeof mapper === 'function', makeMsg(self, 'Bad argument'));
+        assert(cb === undefined, makeMsg(self, 'Unexpected callback'));
         next();
       });
 
       var fn = client.generate('map');
-      fn([1, 2, 3, 4, 5], function(n) {
+      fn(function(n) {
         return n * 2;
-      });
+      }, [1, 2, 3, 4, 5]);
     },
     what: 'Complex function + no response'
   },
