@@ -24,6 +24,78 @@ var tests = [
   },
   { test: function(server, client, next) {
       var self = this;
+      function foo() {}
+      function bar() {}
+      function baz() {}
+      server.add(foo);
+      server.add(bar);
+      server.add(baz);
+      assert.deepEqual(server.methods,
+                       { foo: foo, bar: bar, baz: baz },
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      server.remove([ foo, bar, baz ]);
+      assert.deepEqual(server.methods,
+                       {},
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      next();
+    },
+    what: 'remove(array)'
+  },
+  { test: function(server, client, next) {
+      var self = this;
+      function foo1() {}
+      function bar1() {}
+      function baz1() {}
+      server.add(foo1, 'foo');
+      server.add(bar1, 'bar');
+      server.add(baz1, 'baz');
+      assert.deepEqual(server.methods,
+                       { foo: foo1, bar: bar1, baz: baz1 },
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      server.remove({ foo: foo1, bar: bar1, baz: baz1 });
+      assert.deepEqual(server.methods,
+                       {},
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      next();
+    },
+    what: 'remove(object)'
+  },
+  { test: function(server, client, next) {
+      var self = this;
+      function foo() {}
+      function bar() {}
+      function baz() {}
+      server.add([ foo, bar, baz, 5, [ function() {} ] ]);
+      assert.deepEqual(server.methods,
+                       { foo: foo, bar: bar, baz: baz },
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      next();
+    },
+    what: 'add(array)'
+  },
+  { test: function(server, client, next) {
+      var self = this,
+          funcs = {
+            foo: function() {},
+            bar: function() {},
+            baz: function() {}
+          };
+      server.add({
+        foo: funcs.foo,
+        bar: funcs.bar,
+        baz: funcs.baz,
+        num: 5,
+        arr: [function() {}]
+      });
+      assert.deepEqual(server.methods,
+                       funcs,
+                       makeMsg(self, 'Wrong (number of) methods set'));
+      next();
+    },
+    what: 'add(object)'
+  },
+  { test: function(server, client, next) {
+      var self = this;
       server.add(function multiply(a, b, cb) {
         assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
         cb(a * b);
