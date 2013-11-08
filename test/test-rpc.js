@@ -206,6 +206,25 @@ var tests = [
     },
     what: 'Complex function + no response'
   },
+  { test: function() {
+      var self = this,
+          thisVal = { node: 'rules!' },
+          server = new RPC({ this: thisVal }),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
+      server.add(function foo() {
+        assert(arguments.length === 1, makeMsg(self, 'Bad arguments count'));
+        assert(arguments[0] === undefined, makeMsg(self, 'Unexpected callback'));
+        assert(this === thisVal, makeMsg(self, 'Unexpected \'this\' value'));
+        ++t;
+        next();
+      });
+
+      client.generate('foo')();
+    },
+    what: 'Remote method with custom \'this\''
+  },
 ];
 
 function next() {
