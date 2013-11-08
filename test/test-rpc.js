@@ -7,8 +7,12 @@ var t = 0,
     group = path.basename(__filename, '.js') + '/';
 
 var tests = [
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       function foo() {}
       server.add(foo);
       assert.deepEqual(server.methods,
@@ -18,12 +22,17 @@ var tests = [
       assert.deepEqual(server.methods,
                        {},
                        makeMsg(self, 'Wrong (number of) methods set'));
+      ++t;
       next();
     },
     what: 'remove()'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       function foo() {}
       function bar() {}
       function baz() {}
@@ -37,12 +46,17 @@ var tests = [
       assert.deepEqual(server.methods,
                        {},
                        makeMsg(self, 'Wrong (number of) methods set'));
+      ++t;
       next();
     },
     what: 'remove(array)'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       function foo1() {}
       function bar1() {}
       function baz1() {}
@@ -56,12 +70,17 @@ var tests = [
       assert.deepEqual(server.methods,
                        {},
                        makeMsg(self, 'Wrong (number of) methods set'));
+      ++t;
       next();
     },
     what: 'remove(object)'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       function foo() {}
       function bar() {}
       function baz() {}
@@ -69,17 +88,22 @@ var tests = [
       assert.deepEqual(server.methods,
                        { foo: foo, bar: bar, baz: baz },
                        makeMsg(self, 'Wrong (number of) methods set'));
+      ++t;
       next();
     },
     what: 'add(array)'
   },
-  { test: function(server, client, next) {
+  { test: function() {
       var self = this,
+          server = new RPC(),
+          client = new RPC(),
           funcs = {
             foo: function() {},
             bar: function() {},
             baz: function() {}
           };
+      server.pipe(client).pipe(server);
+
       server.add({
         foo: funcs.foo,
         bar: funcs.bar,
@@ -90,12 +114,17 @@ var tests = [
       assert.deepEqual(server.methods,
                        funcs,
                        makeMsg(self, 'Wrong (number of) methods set'));
+      ++t;
       next();
     },
     what: 'add(object)'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       server.add(function multiply(a, b, cb) {
         assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
         cb(a * b);
@@ -105,16 +134,22 @@ var tests = [
       fn(5, 6, function(err, result) {
         assert(!err, makeMsg(self, 'Unexpected error: ' + err));
         assert(result === 30, makeMsg(self, 'Wrong function result'));
+        ++t;
         next();
       });
     },
     what: 'Basic function + response'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       server.add(function multiply(a, b, cb) {
         assert(a === 5 && b === 6, makeMsg(self, 'Wrong function arguments'));
         assert(cb === undefined, makeMsg(self, 'Unexpected callback'));
+        ++t;
         process.nextTick(next);
       });
 
@@ -126,8 +161,12 @@ var tests = [
     },
     what: 'Basic function + no response'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       server.add(function map(a, mapper, cb) {
         assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
         cb(a.map(mapper));
@@ -141,16 +180,22 @@ var tests = [
         assert.deepEqual(result,
                          [2, 4, 6, 8, 10],
                          makeMsg(self, 'Wrong function result'));
+        ++t;
         next();
       });
     },
     what: 'Complex function + response'
   },
-  { test: function(server, client, next) {
-      var self = this;
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       server.add(function map(mapper, a, cb) {
         assert(typeof mapper === 'function', makeMsg(self, 'Bad argument'));
         assert(cb === undefined, makeMsg(self, 'Unexpected callback'));
+        ++t;
         next();
       });
 
@@ -165,13 +210,8 @@ var tests = [
 
 function next() {
   var tst;
-  if (tst = tests[t]) {
-    ++t;
-    var server = new RPC(),
-        client = new RPC();
-    server.pipe(client).pipe(server);
-    tst.test.call(tst.what, server, client, next);
-  }
+  if (tst = tests[t])
+    tst.test.call(tst.what);
 }
 next();
 
