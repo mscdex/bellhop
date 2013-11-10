@@ -147,7 +147,7 @@ RPC methods
 
     * **highWaterMark** - _integer_ - High water mark to use for this stream (Default: Duplex stream default).
 
-    * Additionally `options` is passed to the underlying Xfer instance, allowing for configuration of Xfer too if needed (not common).
+    * Additionally `options` is passed to the underlying [Xfer](https://github.com/mscdex/xfer) instance, allowing for configuration of Xfer too if needed (not common).
 
 * **generate**(< _string_ >remoteFuncName) - _function_ - Returns a function that can be used when calling a particular remote function. This makes things easier than using send() manually. The return value of the returned function is similar to that of Writable.write() and indicates if the high water mark has been reached.
 
@@ -177,4 +177,4 @@ Pubsub methods
 
     * **highWaterMark** - _integer_ - High water mark to use for this stream (Default: Duplex stream default).
 
-    * Additionally `options` is passed to the underlying Xfer instance, allowing for configuration of Xfer too if needed (not common).
+    * Additionally `options` is passed to the underlying [Xfer](https://github.com/mscdex/xfer) instance, allowing for configuration of Xfer too if needed (not common).
