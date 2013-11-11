@@ -108,6 +108,65 @@ RPC_Client.pipe(RPC_Server).pipe(RPC_Client);
 // customCalc() Finished executing function on server
 ```
 
+* RPC over HTTP (10 simultaneous requests to same RPC server stream using [Conveyor](https://github.com/mscdex/conveyor)):
+
+```javascript
+var http = require('http');
+var Conveyor = require('conveyor'),
+    RPC = require('bellhop').RPC;
+
+var RPC_Server = new RPC(),
+    c = new Conveyor(RPC_Server);
+
+RPC_Server.add(function multiply(a, b) {
+  var cb = arguments[arguments.length - 1];
+  cb && cb(a * b);
+});
+
+var TOTAL = 10, count = 0;
+
+http.createServer(function(req, res) {
+  if (++count === TOTAL)
+    this.close();
+  c.push(req, res);
+}).listen(8080, function() {
+  console.log('HTTP RPC server listening');
+
+  for (var i = 0; i < TOTAL; ++i) {
+    (function(n) {
+      var RPC_Client = new RPC(),
+          multiply = RPC_Client.generate('multiply'),
+          req = http.request({
+            host: '127.0.0.1',
+            port: 8080,
+            method: 'POST'
+          }, function(res) {
+            res.pipe(RPC_Client, { end: false });
+          });
+      RPC_Client.pipe(req);
+      multiply(2, n, function(err, result) {
+        console.log('Result = ' + result);
+        req.end();
+      });
+    })(i);
+  }
+});
+
+// Output:
+//
+// HTTP RPC server listening
+// Result = 0
+// Result = 2
+// Result = 4
+// Result = 6
+// Result = 8
+// Result = 10
+// Result = 12
+// Result = 14
+// Result = 16
+// Result = 18
+```
+
 * Simple Pubsub (no intermediate medium/stream):
 
 ```javascript
