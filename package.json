@@ -3,9 +3,6 @@
   "author": "Brian White <mscdex@mscdex.net>",
   "description": "Pubsub and RPC streams for node.js",
   "main": "./lib/main",
-  "dependencies": {
-    "xfer": "0.2.1"
-  },
   "scripts": {
     "test": "node test/test.js"
   },
