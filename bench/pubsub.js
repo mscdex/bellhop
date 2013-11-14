@@ -30,9 +30,17 @@ benches = [
       pub.events.emit('foo');
   },
   function() {
-    init('3 strings');
+    init('3 short strings');
     for (var i = 0; i < ITERATIONS; ++i)
       pub.events.emit('foo', 'abc', 'def', 'ghi');
+  },
+  function() {
+    init('3 longer strings');
+    for (var i = 0; i < ITERATIONS; ++i) {
+      pub.events.emit('foo', 'Donec sit amet volutpat sapien.',
+                             'Aliquam molestie augue nec felis ultrices auctor. Nullam sagittis, nisl.',
+                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras cursus fermentum nibh, ac pharetra lectus.');
+    }
   },
   function() {
     init('3 regexps');
@@ -49,7 +57,7 @@ benches = [
       pub.events.emit('foo', bar, baz, blah);
   },
   function() {
-    init('5 numbers');
+    init('5 numeric values');
     for (var i = 0; i < ITERATIONS; ++i)
       pub.events.emit('foo', 5, 10.5, Infinity, -Infinity, NaN);
   }

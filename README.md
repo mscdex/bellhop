@@ -4,44 +4,6 @@ Description
 
 A node.js module that exposes streams for doing Pubsub and RPC.
 
-Notes:
-
- * Serialization of types unsupported by JSON is an option and is enabled by default.
- 
- * Properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization.
-
- * Circular references are not detected.
-
- * RPC-specific:
-
-     * Callback functions follow the error-first argument pattern. Any arguments after the error argument are values returned by the other side.
-
-     * All functions returned by `generate()` will assume that a function passed as the last argument will be a callback to be executed when the server responds. If you need to pass a function to the other side, make sure a non-function value separates it and the optional callback **OR** you can use `send()` directly instead. Examples:
-
-        ```javascript
-        // ....
-        var map = RPC_Client.generate('map');
-
-        // no callback/response (THIS IS WRONG, the mapper function will not be sent to the other side and will be used as a callback instead)
-        map([0, 1, 2, 3, 4], function(n) { return n * 2; });
-
-        // no callback/response
-        map(function(n) { return n * 2; }, [0, 1, 2, 3, 4]);
-
-        // callback/response requested
-        map(function(n) { return n * 2; }, [0, 1, 2, 3, 4], function(result) { console.log('Result: ' + result); });
-
-        // OR always use `send()` directly if you want/need the mapper function to always be the second argument:
-
-        // no callback/response
-        RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map');
-
-        // callback/response requested
-        RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map', function(result) {
-          console.log('Result: ' + result);
-        });
-        ```
-
 
 Requirements
 ============
@@ -218,6 +180,23 @@ sock.connect(9000, '127.0.0.1');
 ```
 
 
+Benchmarks
+==========
+
+Benchmarks can be found in `bench/`.
+
+Pubsub benchmark (as of 11/14/2013) for Core i7-3770k, Windows 7 x64, node v0.10.22:
+
+```
+50000 events (no args): 327ms
+50000 events (3 short strings): 389ms
+50000 events (3 longer strings): 433ms
+50000 events (3 regexps): 654ms
+50000 events (3 functions): 874ms
+50000 events (5 numeric values): 470ms
+```
+
+
 API
 ===
 
@@ -261,3 +240,43 @@ Pubsub methods
     * **serialize** - _boolean_ - Manually serialize objects that JSON does not support (well)? (Default: true).
 
     * **highWaterMark** - _integer_ - High water mark to use for this stream (Default: Duplex stream default).
+
+
+Notes
+=====
+
+* Serialization of types unsupported by JSON is an option and is enabled by default.
+
+* Properties of "non-plain objects" (e.g. Dates, Functions, Errors, RegExps) are not checked for needed serialization.
+
+* Circular references are not detected.
+
+* RPC-specific:
+
+   * Callback functions follow the error-first argument pattern. Any arguments after the error argument are values returned by the other side.
+
+   * All functions returned by `generate()` will assume that a function passed as the last argument will be a callback to be executed when the server responds. If you need to pass a function to the other side, make sure a non-function value separates it and the optional callback **OR** you can use `send()` directly instead. Examples:
+
+      ```javascript
+      // ....
+      var map = RPC_Client.generate('map');
+
+      // no callback/response (THIS IS WRONG, the mapper function will not be sent to the other side and will be used as a callback instead)
+      map([0, 1, 2, 3, 4], function(n) { return n * 2; });
+
+      // no callback/response
+      map(function(n) { return n * 2; }, [0, 1, 2, 3, 4]);
+
+      // callback/response requested
+      map(function(n) { return n * 2; }, [0, 1, 2, 3, 4], function(result) { console.log('Result: ' + result); });
+
+      // OR always use `send()` directly if you want/need the mapper function to always be the second argument:
+
+      // no callback/response
+      RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map');
+
+      // callback/response requested
+      RPC_Client.send([0, 1, 2, 3, 4], function(n) { return n * 2; }, 'map', function(result) {
+        console.log('Result: ' + result);
+      });
+      ```
