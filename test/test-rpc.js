@@ -278,5 +278,5 @@ function makeMsg(what, msg) {
 
 process.on('exit', function() {
   assert(t === tests.length,
-         '[' + group + '_exit]: Only ran ' + (t - 1) + '/' + tests.length + ' tests');
+         '[' + group + '_exit]: Only finished ' + t + '/' + tests.length + ' tests');
 });
