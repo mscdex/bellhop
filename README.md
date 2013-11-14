@@ -183,10 +183,38 @@ Pubsub2.events.emit('today', new Date());
 
 Pubsub1.pipe(Pubsub2).pipe(Pubsub1);
 
-
 // Example output:
 //
 // Today is: Thu Oct 31 2013 14:02:00 GMT-0400 (Eastern Daylight Time)
+```
+
+* Simple Pubsub over TCP:
+
+```javascript
+var net = require('net');
+
+var Pubsub = require('bellhop').Pubsub;
+
+var PubsubRecvr = new Pubsub(),
+    PubsubSender = new Pubsub();
+
+net.createServer(function(sock) {
+  this.close();
+  PubsubSender.pipe(sock);
+  PubsubSender.events.emit('today', new Date());
+}).listen(9000, '127.0.0.1');
+
+var sock = new net.Socket();
+sock.pipe(PubsubRecvr);
+PubsubRecvr.events.on('today', function(date) {
+  console.log('Today is: ' + date);
+  sock.end();
+});
+sock.connect(9000, '127.0.0.1');
+
+// Example output:
+//
+// Today is: Thu Nov 14 2013 07:52:01 GMT-0500 (Eastern Standard Time)
 ```
 
 
