@@ -179,6 +179,49 @@ sock.connect(9000, '127.0.0.1');
 // Today is: Thu Nov 14 2013 07:52:01 GMT-0500 (Eastern Standard Time)
 ```
 
+* RPC AND Pubsub over the same TCP socket:
+
+```javascript
+var net = require('net');
+
+var Pubsub = require('bellhop').Pubsub,
+    RPC = require('bellhop').RPC;
+
+var rpcServer = new RPC(),
+    rpcClient = new RPC(),
+    pub = new Pubsub(),
+    sub = new Pubsub();
+
+rpcServer.add(function foo() {
+  console.log('Got RPC');
+});
+
+sub.events.on('bar', function() {
+  console.log('Got event');
+});
+
+net.createServer(function(sock) {
+  this.close();
+  sock.pipe(rpcServer);
+  sock.pipe(sub);
+}).listen(9000, '127.0.0.1');
+
+var sock = new net.Socket();
+rpcClient.pipe(sock);
+pub.pipe(sock);
+
+sock.connect(9000, '127.0.0.1', function() {
+  rpcClient.generate('foo')();
+  pub.events.emit('bar');
+  sock.end();
+});
+
+// Output:
+//
+// Got RPC
+// Got event
+```
+
 
 Benchmarks
 ==========
