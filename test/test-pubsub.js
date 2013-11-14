@@ -33,6 +33,19 @@ var tests = [
   },
   { test: function(client1, client2, next) {
       var self = this;
+      client1.events.on('foo', function(a, b, c, d) {
+        assert(arguments.length === 4,
+               makeMsg(self, 'Wrong event argument count'));
+        assert(a === 5 && b === true && c === 'Hello World' && d === null,
+               makeMsg(self, 'Wrong event arguments'));
+        next();
+      });
+      client2.events.emit('foo', 5, true, 'Hello World', null);
+    },
+    what: 'Emit (many args)'
+  },
+  { test: function(client1, client2, next) {
+      var self = this;
       client1.events.on('foo', function(fn) {
         assert(arguments.length === 1,
                makeMsg(self, 'Wrong event argument count'));
