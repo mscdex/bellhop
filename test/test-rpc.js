@@ -146,6 +146,27 @@ var tests = [
           client = new RPC();
       server.pipe(client).pipe(server);
 
+      server.add(function multiply(a, b, c, d, cb) {
+        assert(typeof cb === 'function', makeMsg(self, 'Missing callback'));
+        cb(a * b * c * d);
+      });
+
+      var fn = client.generate('multiply');
+      fn(1, 2, 3, 4, function(err, result) {
+        assert(!err, makeMsg(self, 'Unexpected error: ' + err));
+        assert(result === 24, makeMsg(self, 'Wrong function result'));
+        ++t;
+        next();
+      });
+    },
+    what: 'Basic function + response (many args)'
+  },
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
       server.add(function multiply(a, b, cb) {
         assert(a === 5 && b === 6, makeMsg(self, 'Wrong function arguments'));
         assert(cb === undefined, makeMsg(self, 'Unexpected callback'));
