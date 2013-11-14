@@ -246,6 +246,23 @@ var tests = [
     },
     what: 'Remote method with custom \'this\''
   },
+  { test: function() {
+      var self = this,
+          server = new RPC(),
+          client = new RPC();
+      server.pipe(client).pipe(server);
+
+      server.add(function foo() {
+        assert(arguments.length === 1, makeMsg(self, 'Bad arguments count'));
+        assert(arguments[0] === undefined, makeMsg(self, 'Unexpected callback'));
+        ++t;
+        next();
+      });
+
+      client.send('foo');
+    },
+    what: 'send(\'event\')'
+  },
 ];
 
 function next() {
