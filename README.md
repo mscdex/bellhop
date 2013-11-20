@@ -28,49 +28,102 @@ var RPC = require('bellhop').RPC;
 var RPC_Server = new RPC(),
     RPC_Client = new RPC();
 
-RPC_Server.add(function add(a, b) {
-  var cb = arguments[arguments.length - 1];
-  cb && cb(a + b);
-});
-RPC_Server.add(function serverDate() {
-  var cb = arguments[arguments.length - 1];
-  cb && cb(new Date());
-});
-RPC_Server.add(function customCalc(fn) {
-  var cb = arguments[arguments.length - 1];
-  cb && cb(fn());
+// Server
+
+RPC_Server.add({
+  add: function(a, b, cb) {
+    cb(a + b);
+  },
+  serverDate: function(cb) {
+    cb(new Date());
+  },
+  log: function(fn, cb) {
+    cb(fn());
+  }
 });
 
+// Client
 
-var add = RPC_Client.generate('add'),
-    serverDate = RPC_Client.generate('serverDate'),
-    customCalc = RPC_Client.generate('customCalc');
-
-add(5, 5, function(err, result) {
+RPC_Client.send(5, 5, 'add', function(err, result) {
   console.log('add() result = ' + result);
 });
-serverDate(function(err, date) {
+RPC_Client.send('serverDate', function(err, date) {
   console.log('serverDate() date UNIX timestamp: ' + date.getTime());
 });
-customCalc(function() {
+RPC_Client.send(function() {
   console.log('Look at me, I am running on the server!');
-}, function(err) {
-  console.log('customCalc() Finished executing function on server');
+}, 'log', function(err) {
+  console.log('log() Finished executing function on server');
 });
 
-
+// simple in-process RPC
 RPC_Client.pipe(RPC_Server).pipe(RPC_Client);
 
 
 // Example output:
 //
-// add() result = 10
-// serverDate() date UNIX timestamp: 1383242166000
 // Look at me, I am running on the server!
-// customCalc() Finished executing function on server
+// add() result = 10
+// serverDate() date UNIX timestamp: 1384958692554
+// log() Finished executing function on server
 ```
 
-* RPC over HTTP (10 simultaneous requests to same RPC server stream using [Conveyor](https://github.com/mscdex/conveyor)):
+* RPC over HTTP:
+
+```javascript
+var http = require('http');
+var RPC = require('bellhop').RPC;
+
+function multiply(a, b, cb) {
+  cb(a * b);
+}
+
+var TOTAL = 10, count = 0;
+
+http.createServer(function(req, res) {
+  var RPC_Server = new RPC();
+  RPC_Server.add(multiply);
+  req.pipe(RPC_Server).pipe(res);
+  if (++count === TOTAL)
+    this.close();
+}).listen(8080, function() {
+  console.log('HTTP RPC server listening');
+
+  for (var i = 0; i < TOTAL; ++i) {
+    (function(n) {
+      var RPC_Client = new RPC(),
+          req = http.request({
+            host: '127.0.0.1',
+            port: 8080,
+            method: 'POST'
+          }, function(res) {
+            res.pipe(RPC_Client);
+          });
+      RPC_Client.pipe(req);
+      RPC_Client.send(2, n, 'multiply', function(err, result) {
+        console.log('Result = ' + result);
+        req.socket.end();
+      });
+    })(i);
+  }
+});
+
+// Output:
+//
+// HTTP RPC server listening
+// Result = 0
+// Result = 2
+// Result = 4
+// Result = 6
+// Result = 8
+// Result = 10
+// Result = 12
+// Result = 14
+// Result = 16
+// Result = 18
+```
+
+* RPC over HTTP (reusing the same RPC server stream with [Conveyor](https://github.com/mscdex/conveyor)):
 
 ```javascript
 var http = require('http');
@@ -97,18 +150,17 @@ http.createServer(function(req, res) {
   for (var i = 0; i < TOTAL; ++i) {
     (function(n) {
       var RPC_Client = new RPC(),
-          multiply = RPC_Client.generate('multiply'),
           req = http.request({
             host: '127.0.0.1',
             port: 8080,
             method: 'POST'
           }, function(res) {
-            res.pipe(RPC_Client, { end: false });
+            res.pipe(RPC_Client);
           });
       RPC_Client.pipe(req);
-      multiply(2, n, function(err, result) {
+      RPC_Client.send(2, n, 'multiply', function(err, result) {
         console.log('Result = ' + result);
-        req.end();
+        req.socket.end();
       });
     })(i);
   }
@@ -143,6 +195,7 @@ Pubsub1.events.on('today', function(date) {
 
 Pubsub2.events.emit('today', new Date());
 
+// simple in-process Pubsub
 Pubsub1.pipe(Pubsub2).pipe(Pubsub1);
 
 // Example output:
@@ -192,6 +245,8 @@ var rpcServer = new RPC(),
     pub = new Pubsub(),
     sub = new Pubsub();
 
+// Servers
+
 rpcServer.add(function foo() {
   console.log('Got RPC');
 });
@@ -206,12 +261,14 @@ net.createServer(function(sock) {
   sock.pipe(sub);
 }).listen(9000, '127.0.0.1');
 
+// Clients
+
 var sock = new net.Socket();
 rpcClient.pipe(sock);
 pub.pipe(sock);
 
 sock.connect(9000, '127.0.0.1', function() {
-  rpcClient.generate('foo')();
+  rpcClient.send('foo');
   pub.events.emit('bar');
   sock.end();
 });
