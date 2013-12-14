@@ -307,7 +307,7 @@ RPC methods
 
 * **(constructor)**([< _object_ >options]) - Creates and returns a new RPC instance with the following valid `options`:
 
-    * **serialize** - _boolean_ - Manually serialize objects that JSON does not support (well)? (Default: true).
+    * **serialize** - _boolean_ - Automatically serialize objects that JSON does not support (well)? (Default: true).
 
     * **ignoreInvalidCall** - _boolean_ - Do not send error responses to incoming function call requests for invalid methods (Default: false).
 
