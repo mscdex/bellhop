@@ -95,7 +95,8 @@ http.createServer(function(req, res) {
           req = http.request({
             host: '127.0.0.1',
             port: 8080,
-            method: 'POST'
+            method: 'POST',
+            agent: false
           }, function(res) {
             res.pipe(RPC_Client);
           });
@@ -283,9 +284,9 @@ sock.connect(9000, '127.0.0.1', function() {
 Benchmarks
 ==========
 
-Benchmarks can be found in `bench/`.
+Benchmarks code can be found in `bench/`.
 
-Pubsub benchmark (as of 11/14/2013) for Core i7-3770k, Windows 7 x64, node v0.10.22:
+Pubsub benchmark results (as of 11/14/2013) for Core i7-3770k, Windows 7 x64, node v0.10.22:
 
 ```
 50000 events (no args): 327ms
